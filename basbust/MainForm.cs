@@ -10,6 +10,7 @@ using Un4seen.Bass.AddOn.Enc;
 //       bass_fx.dll
 //       bass_enc.dll
 //       lame.exe
+//       lame_enc.dll
 
 namespace basbust
 {
@@ -166,9 +167,7 @@ namespace basbust
             // Энкодим в мп3
             // По идее для такого процесса желательно создать отдельный тред, чтобы не вешать интерфейс
             // Но так как процесс занимает буквально до 10 секунд, то проще оставить как есть
-            int encoder = BassEnc.BASS_Encode_Start(fxStream, "lame -b128 - \"" + saveFile.FileName + "\"", 0, null, this.Handle);
-
-            int[] encBuffer = new int[32767]; // буффер для записи
+            int encoder = BassEnc.BASS_Encode_Start(fxStream, "lame -b192 - \"" + saveFile.FileName + "\"", 0, null, this.Handle);
 
             long i = 0;
             while (i < Bass.BASS_ChannelGetLength(fxStream) - 1)
@@ -178,9 +177,7 @@ namespace basbust
                 long len = Bass.BASS_ChannelSeconds2Bytes(fxStream, 1);
                 Bass.BASS_ChannelUpdate(fxStream, 1000);
 
-                BassEnc.BASS_Encode_Write(encoder, encBuffer, (int)len);
                 i += len;
-
                 debugInfo.Text = Bass.BASS_ErrorGetCode().ToString() + "\n" + len + "\n" + i + "\n" + Bass.BASS_ChannelGetLength(fxStream);
             }
             BassEnc.BASS_Encode_Stop(encoder);
