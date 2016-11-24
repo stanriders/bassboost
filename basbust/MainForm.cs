@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows.Forms;
+using System.Threading;
 using Un4seen.Bass;
 using Un4seen.Bass.AddOn.Fx;
 using Un4seen.Bass.AddOn.Enc;
@@ -58,15 +59,14 @@ namespace basbust
         {
             if (openfile.FileName != String.Empty)
             {
-                // Правим интерфейс
-                selectButton.Text = "Заебись";
-                selectButton.Enabled = false;
-
                 audioPath = openfile.FileName;
                 fileName.Text = audioPath;
 
                 playButton.Enabled = true;
                 saveButton.Enabled = true;
+
+                Bass.BASS_StreamFree(audioStream);
+                Bass.BASS_StreamFree(fxStream);
 
                 audioStream = Bass.BASS_StreamCreateFile(audioPath, 0, 0, BASSFlag.BASS_STREAM_DECODE | BASSFlag.BASS_STREAM_PRESCAN);
                 if (audioStream != 0)
@@ -78,9 +78,9 @@ namespace basbust
                         distortion = Bass.BASS_ChannelSetFX(fxStream, BASSFXType.BASS_FX_BFX_DISTORTION, -4);
 
                         BASS_BFX_DISTORTION dist = new BASS_BFX_DISTORTION();
-                        dist.fDrive = 0.0f;
+                        dist.fDrive = distAmount.Value;
                         dist.fDryMix = 5.0f;
-                        dist.fWetMix = 1.0f;
+                        dist.fWetMix = distAmount.Value / 3.0f;
                         dist.fFeedback = -0.5f;
                         dist.fVolume = 0.1f;
 
@@ -91,7 +91,7 @@ namespace basbust
                         BASS_DX8_PARAMEQ eq = new BASS_DX8_PARAMEQ();
                         eq.fBandwidth = 24;
                         eq.fCenter = 80;
-                        eq.fGain = 0;
+                        eq.fGain = bassAmount.Value;
 
                         Bass.BASS_FXSetParameters(bassboost, eq);
 
@@ -126,30 +126,36 @@ namespace basbust
 
         private void distAmount_Scroll(object sender, EventArgs e)
         {
-            // Изменение драйва и вета дисторшена
-            BASS_BFX_DISTORTION dist = new BASS_BFX_DISTORTION();
-            Bass.BASS_FXGetParameters(distortion, dist);
+            if (fxStream != 0)
+            {
+                // Изменение драйва и вета дисторшена
+                BASS_BFX_DISTORTION dist = new BASS_BFX_DISTORTION();
+                Bass.BASS_FXGetParameters(distortion, dist);
 
-            dist.fDrive = distAmount.Value;
-            dist.fWetMix = distAmount.Value / 3.0f;
-            Bass.BASS_FXSetParameters(distortion, dist);
+                dist.fDrive = distAmount.Value;
+                dist.fWetMix = distAmount.Value / 3.0f;
+                Bass.BASS_FXSetParameters(distortion, dist);
+            }
         }
 
         private void bassAmount_Scroll(object sender, EventArgs e)
         {
-            // Изменения гейна эквалайзеров
-            BASS_DX8_PARAMEQ eq = new BASS_DX8_PARAMEQ();
-            Bass.BASS_FXGetParameters(bassboost, eq);
-
-            eq.fGain = bassAmount.Value;
-            Bass.BASS_FXSetParameters(bassboost, eq);
-            Bass.BASS_FXSetParameters(bassboost2, eq);
-
-            // Делаем кол-во Ы в лейбле равным бусту
-            bassAmountLabel.Text = "БасЫ";
-            for (int i = 1; i <= bassAmount.Value; i++)
+            if (fxStream != 0)
             {
-                bassAmountLabel.Text += "ы";
+                // Изменения гейна эквалайзеров
+                BASS_DX8_PARAMEQ eq = new BASS_DX8_PARAMEQ();
+                Bass.BASS_FXGetParameters(bassboost, eq);
+
+                eq.fGain = bassAmount.Value;
+                Bass.BASS_FXSetParameters(bassboost, eq);
+                Bass.BASS_FXSetParameters(bassboost2, eq);
+
+                // Делаем кол-во Ы в лейбле равным бусту
+                bassAmountLabel.Text = "БасЫ";
+                for (int i = 1; i <= bassAmount.Value; i++)
+                {
+                    bassAmountLabel.Text += "ы";
+                }
             }
         }
 
@@ -164,23 +170,53 @@ namespace basbust
 
         private void saveFile_FileOk(object sender, CancelEventArgs e)
         {
+            Encode(saveFile.FileName);
+        }
+
+        private void Encode(string filename)
+        {
+            // Отключаем кнопки
+            playButton.Enabled = false;
+            saveButton.Enabled = false;
+            selectButton.Enabled = false;
+
+            encodeProgress.Visible = true;
+
             // Энкодим в мп3
-            // По идее для такого процесса желательно создать отдельный тред, чтобы не вешать интерфейс
-            // Но так как процесс занимает буквально до 10 секунд, то проще оставить как есть
-            int encoder = BassEnc.BASS_Encode_Start(fxStream, "lame -b192 - \"" + saveFile.FileName + "\"", 0, null, this.Handle);
-
-            long i = 0;
-            while (i < Bass.BASS_ChannelGetLength(fxStream) - 1)
+            ThreadPool.QueueUserWorkItem(w =>
             {
-                // Так как буфер в 1сек, то и записываем по одной секунде данных в проход
-                Bass.BASS_ChannelSetPosition(fxStream, i, BASSMode.BASS_POS_BYTES);
-                long len = Bass.BASS_ChannelSeconds2Bytes(fxStream, 1);
-                Bass.BASS_ChannelUpdate(fxStream, 1000);
+                int encoder = BassEnc.BASS_Encode_Start(fxStream, "lame -b192 - \"" + filename + "\"", 0, null, IntPtr.Zero/*this.Handle*/);
 
-                i += len;
-                debugInfo.Text = Bass.BASS_ErrorGetCode().ToString() + "\n" + len + "\n" + i + "\n" + Bass.BASS_ChannelGetLength(fxStream);
-            }
-            BassEnc.BASS_Encode_Stop(encoder);
+                long i = 0;
+                long chanLenght = Bass.BASS_ChannelGetLength(fxStream);
+                while (i < chanLenght - 1)
+                {
+                    // Так как буфер в 1сек, то и записываем по одной секунде данных в проход
+                    Bass.BASS_ChannelSetPosition(fxStream, i, BASSMode.BASS_POS_BYTES);
+                    long len = Bass.BASS_ChannelSeconds2Bytes(fxStream, 1);
+                    Bass.BASS_ChannelUpdate(fxStream, 1000);
+
+                    i += len;
+
+                    this.Invoke((MethodInvoker)delegate
+                    {
+                        encodeProgress.Value = (int)(i * 100 / chanLenght);
+                        debugInfo.Text = Bass.BASS_ErrorGetCode().ToString() + "\n" + len + "\n" + i + "\n" + Bass.BASS_ChannelGetLength(fxStream);
+                    });
+                }
+
+                // ехал инвок через инвок
+                this.Invoke((MethodInvoker)delegate
+                {
+                    encodeProgress.Visible = false;
+
+                    playButton.Enabled = true;
+                    saveButton.Enabled = true;
+                    selectButton.Enabled = true;
+                });
+
+                BassEnc.BASS_Encode_Stop(encoder);
+            });
         }
 
         private void infoButton_Click(object sender, EventArgs e)

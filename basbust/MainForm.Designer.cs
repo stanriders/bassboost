@@ -40,6 +40,7 @@
             this.saveButton = new System.Windows.Forms.Button();
             this.saveFile = new System.Windows.Forms.SaveFileDialog();
             this.infoButton = new System.Windows.Forms.Button();
+            this.encodeProgress = new System.Windows.Forms.ProgressBar();
             ((System.ComponentModel.ISupportInitialize)(this.distAmount)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.bassAmount)).BeginInit();
             this.SuspendLayout();
@@ -100,11 +101,11 @@
             // 
             // debugInfo
             // 
-            this.debugInfo.Location = new System.Drawing.Point(16, 197);
+            this.debugInfo.Location = new System.Drawing.Point(269, 13);
             this.debugInfo.Name = "debugInfo";
-            this.debugInfo.Size = new System.Drawing.Size(236, 63);
+            this.debugInfo.Size = new System.Drawing.Size(243, 265);
             this.debugInfo.TabIndex = 5;
-            this.debugInfo.Text = "хуйня какая-то)) ";
+            this.debugInfo.Text = "залезь обратно придурок бля!\r\n";
             // 
             // label1
             // 
@@ -144,19 +145,30 @@
             // infoButton
             // 
             this.infoButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 6.25F);
-            this.infoButton.Location = new System.Drawing.Point(13, 263);
+            this.infoButton.Location = new System.Drawing.Point(12, 210);
             this.infoButton.Name = "infoButton";
-            this.infoButton.Size = new System.Drawing.Size(239, 20);
+            this.infoButton.Size = new System.Drawing.Size(240, 20);
             this.infoButton.TabIndex = 9;
             this.infoButton.Text = "чот непонятно нихуя";
             this.infoButton.UseVisualStyleBackColor = true;
             this.infoButton.Click += new System.EventHandler(this.infoButton_Click);
             // 
+            // encodeProgress
+            // 
+            this.encodeProgress.Location = new System.Drawing.Point(12, 181);
+            this.encodeProgress.Name = "encodeProgress";
+            this.encodeProgress.Size = new System.Drawing.Size(240, 23);
+            this.encodeProgress.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            this.encodeProgress.TabIndex = 10;
+            this.encodeProgress.Visible = false;
+            // 
             // mainForm
             // 
+            this.AcceptButton = this.infoButton;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(267, 286);
+            this.ClientSize = new System.Drawing.Size(264, 242);
+            this.Controls.Add(this.encodeProgress);
             this.Controls.Add(this.infoButton);
             this.Controls.Add(this.saveButton);
             this.Controls.Add(this.bassAmountLabel);
@@ -167,7 +179,10 @@
             this.Controls.Add(this.playButton);
             this.Controls.Add(this.fileName);
             this.Controls.Add(this.selectButton);
+            this.MaximumSize = new System.Drawing.Size(540, 280);
+            this.MinimumSize = new System.Drawing.Size(280, 280);
             this.Name = "mainForm";
+            this.ShowIcon = false;
             this.Text = "кач";
             this.Load += new System.EventHandler(this.mainForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.distAmount)).EndInit();
@@ -191,6 +206,7 @@
         private System.Windows.Forms.Button saveButton;
         private System.Windows.Forms.SaveFileDialog saveFile;
         private System.Windows.Forms.Button infoButton;
+        private System.Windows.Forms.ProgressBar encodeProgress;
     }
 }
 
