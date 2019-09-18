@@ -1,0 +1,84 @@
+﻿<Window x:Class="basbust_next.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Regular"
+        TextElement.FontSize="13"
+        TextOptions.TextFormattingMode="Ideal" 
+        TextOptions.TextRenderingMode="Auto"
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{DynamicResource MaterialDesignFont}" 
+        SizeToContent="WidthAndHeight" 
+        MinWidth="220" MinHeight="260" MaxHeight="260" 
+        Title="кач" ResizeMode="CanMinimize">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Button.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.DialogHost.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <materialDesign:DialogHost Identifier="RootDialog" Name="dialogHost">
+        <StackPanel>
+            <materialDesign:Card Margin="10,10,10,5">
+                <StackPanel>
+                    <Label Margin="10,5,10,0">Басы</Label>
+                    <Slider Name="bassAmount"
+                            Margin="10,-30,10,10" 
+                            Minimum="0"
+                            Maximum="10"
+                            Style="{StaticResource MaterialDesignDiscreteSlider}"
+                            ToolTip="Лютость баса" ValueChanged="BassAmount_ValueChanged"/>
+                </StackPanel>
+            </materialDesign:Card>
+            <materialDesign:Card Margin="10,10,10,5">
+                <StackPanel>
+                    <Label Margin="10,5,10,0">Громкость</Label>
+                    <Slider Name="volumeAmount"
+                            Margin="10,-30,10,10" 
+                            Minimum="0"
+                            Maximum="100"
+                            Value="100"
+                            Style="{StaticResource MaterialDesignDiscreteSlider}"
+                            ToolTip="Долбит нормально?" ValueChanged="VolumeAmount_ValueChanged"/>
+                </StackPanel>
+            </materialDesign:Card>
+            <!-- lower buttons -->
+            <DockPanel LastChildFill="True" FlowDirection="LeftToRight" MinWidth="180" Margin="10">
+                <Button Name="openButton" 
+                        DockPanel.Dock="Left" 
+                        Click="OpenButton_OnClick" 
+                        ToolTip="Открыть"
+                        Style="{StaticResource MaterialDesignRaisedButton}">
+                    <materialDesign:PackIcon Kind="OpenInApp" Height="20" Width="20" />
+                </Button>
+                <Button Name="saveButton"
+                        DockPanel.Dock="Right"
+                        Click="SaveButton_OnClick"
+                        IsEnabled="False"
+                        ToolTip="Сохранить"
+                        Style="{StaticResource MaterialDesignRaisedButton}">
+                    <materialDesign:PackIcon Kind="ContentSave" Height="20" Width="20" />
+                </Button>
+                <Button Name="playButton"
+                        HorizontalAlignment="Center"
+                        Style="{StaticResource MaterialDesignFloatingActionButton}"
+                        ToolTip="Заценить"
+                        Height="45"
+                        Width="45"
+                        Click="PlayButton_OnClick"
+                        IsEnabled="False"
+                        materialDesign:ButtonProgressAssist.IsIndicatorVisible="False"
+                        materialDesign:ButtonProgressAssist.Value="-1"
+                        materialDesign:ButtonProgressAssist.IsIndeterminate="True">
+                    <materialDesign:PackIcon Kind="Play" Name="playIcon" Height="25" Width="25" />
+                </Button>
+            </DockPanel>
+        </StackPanel>
+    </materialDesign:DialogHost>
+</Window>
