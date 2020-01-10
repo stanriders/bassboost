@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
     <RootNamespace>basbust_next</RootNamespace>
   </PropertyGroup>
@@ -11,8 +11,8 @@
     <PackageReference Include="ManagedBass" Version="2.0.4" />
     <PackageReference Include="ManagedBass.Enc" Version="2.0.0" />
     <PackageReference Include="ManagedBass.Fx" Version="2.0.1" />
-    <PackageReference Include="MaterialDesignColors" Version="1.2.1-ci542" />
-    <PackageReference Include="MaterialDesignThemes" Version="3.0.0-ci542" />
+    <PackageReference Include="MaterialDesignColors" Version="1.2.2" />
+    <PackageReference Include="MaterialDesignThemes" Version="3.0.1" />
   </ItemGroup>
 
 </Project>
